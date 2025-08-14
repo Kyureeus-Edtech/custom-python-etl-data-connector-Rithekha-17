@@ -1,7 +1,7 @@
 import os
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import time
@@ -81,8 +81,8 @@ class OTXETLConnector:
                     'indicators': pulse.get('indicators', []),
                     'malware_families': pulse.get('malware_families', []),
                     'attack_ids': pulse.get('attack_ids', []),
-                    # Add ingestion timestamp
-                    'ingestion_timestamp': datetime.utcnow(),
+                    # Add ingestion timestamp (timezone-aware)
+                    'ingestion_timestamp': datetime.now(timezone.utc),
                     'source': 'otx_alienvault',
                     'raw_data': pulse  # Keep original data for reference
                 }
@@ -117,7 +117,7 @@ class OTXETLConnector:
     def run_etl_pipeline(self):
         """Run the complete ETL pipeline"""
         print("=== Starting OTX ETL Pipeline ===")
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         # Extract
         print("\n1. EXTRACT Phase")
@@ -139,7 +139,7 @@ class OTXETLConnector:
         print("\n3. LOAD Phase")
         loaded_count = self.load_data(transformed_data)
         
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         duration = (end_time - start_time).total_seconds()
         
         print(f"\n=== Pipeline Complete ===")
